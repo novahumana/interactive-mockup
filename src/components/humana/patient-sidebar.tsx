@@ -15,7 +15,6 @@ import {
   SidebarMenuItem,
   SidebarSeparator,
 } from "@/components/ui/sidebar";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 
@@ -28,10 +27,34 @@ interface Patient {
 }
 
 const patients: Patient[] = [
-  { id: "1", name: "Mario R.", patientId: "PZ-023", status: "active", initials: "MR" },
-  { id: "2", name: "Laura F.", patientId: "PZ-024", status: "intake", initials: "LF" },
-  { id: "3", name: "Giada D.", patientId: "PZ-025", status: "active", initials: "GD" },
-  { id: "4", name: "Tommaso G.", patientId: "PZ-026", status: "active", initials: "TG" },
+  {
+    id: "1",
+    name: "Mario R.",
+    patientId: "PZ-023",
+    status: "active",
+    initials: "MR",
+  },
+  {
+    id: "2",
+    name: "Laura F.",
+    patientId: "PZ-024",
+    status: "intake",
+    initials: "LF",
+  },
+  {
+    id: "3",
+    name: "Giada D.",
+    patientId: "PZ-025",
+    status: "active",
+    initials: "GD",
+  },
+  {
+    id: "4",
+    name: "Tommaso G.",
+    patientId: "PZ-026",
+    status: "active",
+    initials: "TG",
+  },
 ];
 
 const todayAppointments = [
@@ -49,9 +72,10 @@ export function PatientSidebar({ currentPatientId }: PatientSidebarProps) {
 
   const currentPatient = patients.find((p) => p.id === currentPatientId);
 
-  const filteredPatients = patients.filter((patient) =>
-    patient.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    patient.patientId.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredPatients = patients.filter(
+    (patient) =>
+      patient.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      patient.patientId.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   return (
@@ -87,15 +111,9 @@ export function PatientSidebar({ currentPatientId }: PatientSidebarProps) {
           <div className="px-2">
             <div className="rounded-lg border bg-sidebar-accent p-3">
               <div className="flex items-center gap-3">
-                <Avatar className="size-10">
-                  <AvatarImage
-                    src={`/avatars/${currentPatient.id}.png`}
-                    alt={currentPatient.name}
-                  />
-                  <AvatarFallback>{currentPatient.initials}</AvatarFallback>
-                </Avatar>
                 <div className="flex flex-col gap-0.5">
-                  <span className="font-semibold text-sm">
+                  <span className="text-xs text-ring">Current Patient</span>
+                  <span className="font-semibold text-lg">
                     {currentPatient.name}
                   </span>
                   <span className="text-xs text-muted-foreground">
@@ -105,10 +123,14 @@ export function PatientSidebar({ currentPatientId }: PatientSidebarProps) {
               </div>
               <div className="mt-2">
                 <Badge
-                  variant={currentPatient.status === "active" ? "success" : "secondary"}
+                  variant={
+                    currentPatient.status === "active" ? "success" : "secondary"
+                  }
                   className="text-xs"
                 >
-                  {currentPatient.status === "active" ? "Active" : "Intake (New)"}
+                  {currentPatient.status === "active"
+                    ? "Active"
+                    : "Intake (New)"}
                 </Badge>
               </div>
             </div>
@@ -131,16 +153,7 @@ export function PatientSidebar({ currentPatientId }: PatientSidebarProps) {
                   isActive={appointment.id === currentPatientId}
                 >
                   <Link href={`/patients/${appointment.id}`}>
-                    <Avatar className="size-5">
-                      <AvatarImage
-                        src={`/avatars/${appointment.id}.png`}
-                        alt={appointment.name}
-                      />
-                      <AvatarFallback className="text-[10px]">
-                        {appointment.initials}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="flex-1">{appointment.name}</span>
+                    <span className="flex-1 text-sm">{appointment.name}</span>
                     <span className="text-xs text-muted-foreground">
                       {appointment.time}
                     </span>
@@ -167,16 +180,7 @@ export function PatientSidebar({ currentPatientId }: PatientSidebarProps) {
                         isActive={patient.id === currentPatientId}
                       >
                         <Link href={`/patients/${patient.id}`}>
-                          <Avatar className="size-5">
-                            <AvatarImage
-                              src={`/avatars/${patient.id}.png`}
-                              alt={patient.name}
-                            />
-                            <AvatarFallback className="text-[10px]">
-                              {patient.initials}
-                            </AvatarFallback>
-                          </Avatar>
-                          <span>{patient.name}</span>
+                          <span className="text-sm">{patient.name}</span>
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>

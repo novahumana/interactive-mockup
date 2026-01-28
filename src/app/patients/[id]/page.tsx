@@ -8,6 +8,7 @@ import {
   Orbit,
   Lightbulb,
   FolderClosed,
+  FileText,
 } from "lucide-react";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { PatientSidebar } from "@/components/humana/patient-sidebar";
@@ -29,6 +30,8 @@ interface Patient {
   patientId: string;
   status: "active" | "intake";
   aiTranscription: "enabled" | "disabled";
+  lastSession: string;
+  recordedSessions: number;
   caseSummary: string;
   nextSessionPrep: string;
 }
@@ -40,6 +43,8 @@ const patients: Record<string, Patient> = {
     patientId: "PZ-023",
     status: "active",
     aiTranscription: "enabled",
+    lastSession: "2024-09-20",
+    recordedSessions: 3,
     caseSummary: "",
     nextSessionPrep: "",
   },
@@ -49,6 +54,8 @@ const patients: Record<string, Patient> = {
     patientId: "PZ-024",
     status: "intake",
     aiTranscription: "disabled",
+    lastSession: "2024-09-18",
+    recordedSessions: 1,
     caseSummary: "",
     nextSessionPrep: "",
   },
@@ -58,6 +65,8 @@ const patients: Record<string, Patient> = {
     patientId: "PZ-025",
     status: "active",
     aiTranscription: "enabled",
+    lastSession: "2024-09-15",
+    recordedSessions: 5,
     caseSummary: "",
     nextSessionPrep: "",
   },
@@ -67,6 +76,8 @@ const patients: Record<string, Patient> = {
     patientId: "PZ-026",
     status: "active",
     aiTranscription: "disabled",
+    lastSession: "2024-09-12",
+    recordedSessions: 2,
     caseSummary: "",
     nextSessionPrep: "",
   },
@@ -158,19 +169,36 @@ export default function PatientDetailsPage({
                   {/* Case Summary Card */}
                   <Card>
                     <CardHeader>
-                      <CardTitle>Case summary</CardTitle>
+                      <CardTitle className="text-2xl">Case summary</CardTitle>
                       <CardDescription>
-                        Brief overview of the patient&apos;s case and
-                        therapeutic goals
+                        Your notes about this patient&apos;s overall presentation and progress.
                       </CardDescription>
                     </CardHeader>
-                    <CardContent>
-                      <Textarea
-                        placeholder="Write a brief summary of this patient's case, including presenting problems, history, and therapeutic goals..."
-                        className="min-h-[160px] resize-none"
-                        value={caseSummary}
-                        onChange={(e) => setCaseSummary(e.target.value)}
-                      />
+                    <CardContent className="space-y-4">
+                      {/* Session Stats */}
+                      <div className="flex flex-wrap items-center gap-8">
+                        <div className="flex items-center gap-1">
+                          <FileText className="size-4 text-muted-foreground" />
+                          <span className="text-sm text-muted-foreground">Last session:</span>
+                          <span className="text-sm font-medium">{patient.lastSession}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <FileText className="size-4 text-muted-foreground" />
+                          <span className="text-sm text-muted-foreground">Recorded sessions:</span>
+                          <span className="text-sm font-medium">{patient.recordedSessions}</span>
+                        </div>
+                      </div>
+
+                      {/* Summary Notes */}
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Summary notes</label>
+                        <Textarea
+                          placeholder="Patient presents with recurrent depressive episodes linked to workplace stress and perfectionist thinking patterns. Core beliefs around inadequacy identified. Good engagement with cognitive restructuring techniques."
+                          className="min-h-[120px] resize-none"
+                          value={caseSummary}
+                          onChange={(e) => setCaseSummary(e.target.value)}
+                        />
+                      </div>
                     </CardContent>
                   </Card>
 
