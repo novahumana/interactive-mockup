@@ -215,6 +215,11 @@ export default function NotesInsightsPage() {
     Record<string, { id: string; badge?: string; content: string }[]>
   >({});
 
+  // Track deleted note IDs (for original session notes)
+  const [deletedNoteIds, setDeletedNoteIds] = React.useState<Set<string>>(
+    new Set()
+  );
+
   // Local state for bookmarks - persisted in localStorage
   const [bookmarks, setBookmarks] = React.useState<Record<string, Bookmark[]>>(
     {}
@@ -265,13 +270,33 @@ export default function NotesInsightsPage() {
     (s) => s.id === selectedSession,
   );
 
-  // Get notes for current session (combining mock data with local notes)
+  // Track edited note content (for original session notes)
+  const [editedNotes, setEditedNotes] = React.useState<Record<string, string>>(
+    {}
+  );
+
+  // Get notes for current session (all notes are deletable and editable)
   const currentSessionNotes = React.useMemo(() => {
     if (!currentSession) return [];
     const sessionKey = `${selectedPatient}-${selectedSession}`;
     const additionalNotes = localNotes[sessionKey] || [];
-    return [...currentSession.notes, ...additionalNotes];
-  }, [currentSession, selectedPatient, selectedSession, localNotes]);
+    // Original notes from session data (filter out deleted ones, apply edits)
+    const originalNotes = currentSession.notes
+      .filter((note) => !deletedNoteIds.has(note.id))
+      .map((note) => ({
+        ...note,
+        content: editedNotes[note.id] ?? note.content,
+        canDelete: true,
+        canEdit: true,
+      }));
+    // User-created notes are also deletable and editable
+    const userNotes = additionalNotes.map((note) => ({
+      ...note,
+      canDelete: true,
+      canEdit: true,
+    }));
+    return [...originalNotes, ...userNotes];
+  }, [currentSession, selectedPatient, selectedSession, localNotes, deletedNoteIds, editedNotes]);
 
   // Get bookmarks for current patient (stored per-patient, not per-session)
   const currentPatientBookmarks = React.useMemo(() => {
@@ -340,6 +365,59 @@ export default function NotesInsightsPage() {
     setNewNoteBadge("");
     setIsAddNoteDialogOpen(false);
   };
+
+  // Handle deleting a note (both original and user-created)
+  const handleDeleteNote = React.useCallback(
+    (noteId: string) => {
+      if (!selectedPatient || !selectedSession) return;
+      const sessionKey = `${selectedPatient}-${selectedSession}`;
+
+      // Check if it's a user-created note (stored in localNotes)
+      const userNotes = localNotes[sessionKey] || [];
+      const isUserNote = userNotes.some((note) => note.id === noteId);
+
+      if (isUserNote) {
+        // Delete from localNotes
+        setLocalNotes((prev) => ({
+          ...prev,
+          [sessionKey]: (prev[sessionKey] || []).filter((note) => note.id !== noteId),
+        }));
+      } else {
+        // Mark original note as deleted
+        setDeletedNoteIds((prev) => new Set([...prev, noteId]));
+      }
+    },
+    [selectedPatient, selectedSession, localNotes]
+  );
+
+  // Handle editing a note (both original and user-created)
+  const handleEditNote = React.useCallback(
+    (noteId: string, newContent: string) => {
+      if (!selectedPatient || !selectedSession) return;
+      const sessionKey = `${selectedPatient}-${selectedSession}`;
+
+      // Check if it's a user-created note (stored in localNotes)
+      const userNotes = localNotes[sessionKey] || [];
+      const isUserNote = userNotes.some((note) => note.id === noteId);
+
+      if (isUserNote) {
+        // Update in localNotes
+        setLocalNotes((prev) => ({
+          ...prev,
+          [sessionKey]: (prev[sessionKey] || []).map((note) =>
+            note.id === noteId ? { ...note, content: newContent } : note
+          ),
+        }));
+      } else {
+        // Store edited content for original note
+        setEditedNotes((prev) => ({
+          ...prev,
+          [noteId]: newContent,
+        }));
+      }
+    },
+    [selectedPatient, selectedSession, localNotes]
+  );
 
   return (
     <SidebarProvider>
@@ -492,6 +570,8 @@ export default function NotesInsightsPage() {
                     notes={currentSessionNotes}
                     globalSearchQuery={globalSearchQuery}
                     onAddNote={() => setIsAddNoteDialogOpen(true)}
+                    onDeleteNote={handleDeleteNote}
+                    onEditNote={handleEditNote}
                   />
                 </div>
               ) : (

@@ -616,18 +616,18 @@ export function TranscriptionPanel({
   }, [sections, activeSearchQuery]);
 
   return (
-    <div className="flex flex-col gap-4 rounded-lg border bg-card p-4 h-full relative">
+    <div className="flex flex-col gap-4 rounded-xl border bg-card p-4 h-full relative">
       {/* Header */}
       <div className="flex items-start justify-between">
-        <div>
-          <h3 className="text-lg font-semibold">Transcription</h3>
+        <div className="space-y-0.5">
+          <h3 className="text-lg font-semibold leading-none">Transcription</h3>
           <p className="text-sm text-muted-foreground">Duration: {duration}</p>
         </div>
         <Button
           variant={isEditing ? "default" : "outline"}
           size="sm"
           onClick={handleToggleEdit}
-          className="gap-1.5"
+          className="h-8 gap-1.5 rounded-md"
         >
           <Pencil className="size-3.5" />
           {isEditing ? "Done" : "Edit"}
@@ -635,12 +635,12 @@ export function TranscriptionPanel({
       </div>
 
       {/* Search and Bookmarks - disabled during editing */}
-      <div className={`flex items-center justify-between gap-4 ${isEditing ? "opacity-50 pointer-events-none" : ""}`}>
+      <div className={`flex items-center justify-between gap-3 ${isEditing ? "opacity-50 pointer-events-none" : ""}`}>
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
           <Input
             placeholder="Search in the transcription"
-            className="pl-9 pr-12"
+            className="h-9 pl-9 pr-12 rounded-md"
             value={globalSearchQuery || localSearchQuery}
             onChange={(e) => setLocalSearchQuery(e.target.value)}
             disabled={!!globalSearchQuery || isEditing}
@@ -656,11 +656,11 @@ export function TranscriptionPanel({
             onCheckedChange={setShowBookmarks}
             disabled={isEditing}
           />
-          <label htmlFor="bookmarks" className={`text-sm ${isEditing ? "" : "cursor-pointer"}`}>
+          <label htmlFor="bookmarks" className={`text-sm font-medium ${isEditing ? "" : "cursor-pointer"}`}>
             Show Bookmarks
           </label>
           {bookmarks.length > 0 && (
-            <Badge variant="secondary" className="ml-1 bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400">
+            <Badge variant="secondary" className="ml-1 rounded-full bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400">
               {bookmarks.length}
             </Badge>
           )}
@@ -669,8 +669,8 @@ export function TranscriptionPanel({
 
       {/* Session Info */}
       <div className="border-t pt-4">
-        <h4 className="text-lg font-semibold">{sessionTitle}</h4>
-        <p className="text-muted-foreground">{sessionDate}</p>
+        <h4 className="text-lg font-semibold leading-none">{sessionTitle}</h4>
+        <p className="text-sm text-muted-foreground mt-1">{sessionDate}</p>
       </div>
 
       {/* Content */}

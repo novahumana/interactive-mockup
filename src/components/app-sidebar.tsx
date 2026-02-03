@@ -125,16 +125,8 @@ export function AppSidebar() {
             {todayAppointments.map((patient) => (
               <SidebarMenuItem key={patient.id}>
                 <SidebarMenuButton tooltip={patient.name} asChild>
-                  <a href={patient.url}>
-                    <Avatar className="size-5">
-                      <AvatarImage
-                        src={`/avatars/${patient.id}.png`}
-                        alt={patient.name}
-                      />
-                      <AvatarFallback className="text-[10px]">
-                        {patient.initials}
-                      </AvatarFallback>
-                    </Avatar>
+                  <a href={patient.url} className="flex items-center gap-2">
+                    <span aria-hidden />
                     <span>{patient.name}</span>
                   </a>
                 </SidebarMenuButton>
