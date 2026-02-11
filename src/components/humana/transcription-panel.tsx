@@ -21,6 +21,12 @@ import {
   ContextMenuRadioItem,
 } from "@/components/ui/context-menu";
 import { BookmarkPopover, type Bookmark } from "./bookmark-popover";
+import { ConversationTranscript } from "./conversation-transcript";
+
+interface ConversationTurn {
+  speaker: "therapist" | "patient";
+  message: string;
+}
 
 interface TranscriptionSection {
   title: string;
@@ -31,6 +37,7 @@ interface TranscriptionPanelProps {
   sessionTitle: string;
   sessionDate: string;
   duration: string;
+  conversation?: ConversationTurn[];
   sections: TranscriptionSection[];
   globalSearchQuery?: string;
   bookmarks?: Bookmark[];
@@ -38,6 +45,7 @@ interface TranscriptionPanelProps {
   onBookmarkDelete?: (bookmarkId: string) => void;
   onBookmarkUpdate?: (bookmarkId: string, updates: Partial<Bookmark>) => void;
   onSectionsChange?: (sections: TranscriptionSection[]) => void;
+  onConversationChange?: (conversation: ConversationTurn[]) => void;
 }
 
 // Framework and category labels for display
@@ -51,7 +59,7 @@ const categoryLabels: Record<string, string> = {
   "core-beliefs": "Core Beliefs",
   "intermediate-beliefs": "Intermediate Beliefs",
   "coping-strategies": "Coping Strategies",
-  "triggers": "Triggers",
+  triggers: "Triggers",
 };
 
 // Framework options for selection
@@ -100,21 +108,21 @@ function BookmarkHighlight({
       e.stopPropagation();
       onDelete?.(bookmark.id);
     },
-    [bookmark.id, onDelete]
+    [bookmark.id, onDelete],
   );
 
   const handleFrameworkChange = React.useCallback(
     (value: string) => {
       onUpdate?.(bookmark.id, { framework: value });
     },
-    [bookmark.id, onUpdate]
+    [bookmark.id, onUpdate],
   );
 
   const handleCategoryChange = React.useCallback(
     (value: string) => {
       onUpdate?.(bookmark.id, { category: value });
     },
-    [bookmark.id, onUpdate]
+    [bookmark.id, onUpdate],
   );
 
   // Close delete button when clicking outside
@@ -217,7 +225,11 @@ function BookmarkHighlight({
 }
 
 // Pending selection highlight component (styled like bookmark but without number)
-function PendingSelectionHighlight({ children }: { children: React.ReactNode }) {
+function PendingSelectionHighlight({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <span className="underline decoration-green-600 dark:decoration-green-400 decoration-2 underline-offset-2 bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300 rounded-sm px-0.5">
       {children}
@@ -245,20 +257,28 @@ function HighlightedText({
 }) {
   // Find bookmarks that match this text
   const matchingBookmarks = bookmarks.filter((b) =>
-    text.toLowerCase().includes(b.text.toLowerCase())
+    text.toLowerCase().includes(b.text.toLowerCase()),
   );
 
   // Check if this text contains the pending selection
-  const hasPendingSelection = pendingSelection && text.toLowerCase().includes(pendingSelection.toLowerCase());
+  const hasPendingSelection =
+    pendingSelection &&
+    text.toLowerCase().includes(pendingSelection.toLowerCase());
 
   // If no search, no bookmarks to show, and no pending selection, return plain text
-  if (!searchQuery.trim() && (!showBookmarks || matchingBookmarks.length === 0) && !hasPendingSelection) {
+  if (
+    !searchQuery.trim() &&
+    (!showBookmarks || matchingBookmarks.length === 0) &&
+    !hasPendingSelection
+  ) {
     return <>{text}</>;
   }
 
   // Handle pending selection highlighting (takes priority when active)
   if (hasPendingSelection && pendingSelection) {
-    const parts = text.split(new RegExp(`(${escapeRegExp(pendingSelection)})`, "gi"));
+    const parts = text.split(
+      new RegExp(`(${escapeRegExp(pendingSelection)})`, "gi"),
+    );
     return (
       <>
         {parts.map((part, index) => {
@@ -277,12 +297,15 @@ function HighlightedText({
 
   // Handle search highlighting
   if (searchQuery.trim()) {
-    const parts = text.split(new RegExp(`(${escapeRegExp(searchQuery)})`, "gi"));
+    const parts = text.split(
+      new RegExp(`(${escapeRegExp(searchQuery)})`, "gi"),
+    );
 
     return (
       <>
         {parts.map((part, index) => {
-          const isSearchMatch = part.toLowerCase() === searchQuery.toLowerCase();
+          const isSearchMatch =
+            part.toLowerCase() === searchQuery.toLowerCase();
 
           if (isSearchMatch) {
             return (
@@ -298,19 +321,25 @@ function HighlightedText({
           // Check if this part contains bookmarked text when showBookmarks is active
           if (showBookmarks) {
             const partMatchingBookmark = matchingBookmarks.find((b) =>
-              part.toLowerCase().includes(b.text.toLowerCase())
+              part.toLowerCase().includes(b.text.toLowerCase()),
             );
 
             if (partMatchingBookmark) {
               // Need to split this part to highlight only the bookmarked portion
               const bookmarkParts = part.split(
-                new RegExp(`(${escapeRegExp(partMatchingBookmark.text)})`, "gi")
+                new RegExp(
+                  `(${escapeRegExp(partMatchingBookmark.text)})`,
+                  "gi",
+                ),
               );
 
               return (
                 <span key={index}>
                   {bookmarkParts.map((bp, bpIndex) => {
-                    if (bp.toLowerCase() === partMatchingBookmark.text.toLowerCase()) {
+                    if (
+                      bp.toLowerCase() ===
+                      partMatchingBookmark.text.toLowerCase()
+                    ) {
                       return (
                         <BookmarkHighlight
                           key={`${index}-${bpIndex}`}
@@ -361,7 +390,7 @@ function HighlightedText({
         bookmarkSegments.push(
           <span key={`text-${lastIndex}`}>
             {text.slice(lastIndex, match.startIndex)}
-          </span>
+          </span>,
         );
       }
 
@@ -376,7 +405,7 @@ function HighlightedText({
           onUpdate={onBookmarkUpdate}
         >
           {text.slice(match.startIndex, endIndex)}
-        </BookmarkHighlight>
+        </BookmarkHighlight>,
       );
 
       lastIndex = endIndex;
@@ -385,7 +414,7 @@ function HighlightedText({
     // Add remaining text after last bookmark
     if (lastIndex < text.length) {
       bookmarkSegments.push(
-        <span key={`text-${lastIndex}`}>{text.slice(lastIndex)}</span>
+        <span key={`text-${lastIndex}`}>{text.slice(lastIndex)}</span>,
       );
     }
 
@@ -404,6 +433,7 @@ export function TranscriptionPanel({
   sessionTitle,
   sessionDate,
   duration,
+  conversation,
   sections,
   globalSearchQuery = "",
   bookmarks = [],
@@ -411,15 +441,22 @@ export function TranscriptionPanel({
   onBookmarkDelete,
   onBookmarkUpdate,
   onSectionsChange,
+  onConversationChange,
 }: TranscriptionPanelProps) {
   const [localSearchQuery, setLocalSearchQuery] = React.useState("");
   const [showBookmarks, setShowBookmarks] = React.useState(false);
   const [popoverOpen, setPopoverOpen] = React.useState(false);
   const [selectedText, setSelectedText] = React.useState("");
   const [popoverPosition, setPopoverPosition] = React.useState({ x: 0, y: 0 });
-  const [pendingSelection, setPendingSelection] = React.useState<string | null>(null);
+  const [pendingSelection, setPendingSelection] = React.useState<string | null>(
+    null,
+  );
   const [isEditing, setIsEditing] = React.useState(false);
-  const [editedSections, setEditedSections] = React.useState<TranscriptionSection[]>(sections);
+  const [editedSections, setEditedSections] =
+    React.useState<TranscriptionSection[]>(sections);
+  const [editedConversation, setEditedConversation] = React.useState<
+    ConversationTurn[]
+  >(conversation || []);
   const contentRef = React.useRef<HTMLDivElement>(null);
 
   // Sync editedSections with sections when sections change (e.g., switching sessions)
@@ -427,11 +464,17 @@ export function TranscriptionPanel({
     setEditedSections(sections);
   }, [sections]);
 
+  // Sync editedConversation with conversation when conversation changes (e.g., switching sessions)
+  React.useEffect(() => {
+    setEditedConversation(conversation || []);
+  }, [conversation]);
+
   // Handle toggling edit mode
   const handleToggleEdit = React.useCallback(() => {
     if (isEditing) {
       // Exiting edit mode - save changes
       onSectionsChange?.(editedSections);
+      onConversationChange?.(editedConversation);
     }
     setIsEditing(!isEditing);
     // Clear any pending selection when entering edit mode
@@ -440,7 +483,13 @@ export function TranscriptionPanel({
       setPopoverOpen(false);
       window.getSelection()?.removeAllRanges();
     }
-  }, [isEditing, editedSections, onSectionsChange]);
+  }, [
+    isEditing,
+    editedSections,
+    editedConversation,
+    onSectionsChange,
+    onConversationChange,
+  ]);
 
   // Handle section content change
   const handleSectionContentChange = React.useCallback(
@@ -451,7 +500,7 @@ export function TranscriptionPanel({
         return updated;
       });
     },
-    []
+    [],
   );
 
   // Use global search if provided, otherwise use local search
@@ -464,7 +513,7 @@ export function TranscriptionPanel({
         ...b,
         orderNumber: index + 1,
       })),
-    [bookmarks]
+    [bookmarks],
   );
 
   // Expand selection to word boundaries
@@ -480,7 +529,10 @@ export function TranscriptionPanel({
     const startContainer = range.startContainer;
     const endContainer = range.endContainer;
 
-    if (startContainer.nodeType === Node.TEXT_NODE && endContainer.nodeType === Node.TEXT_NODE) {
+    if (
+      startContainer.nodeType === Node.TEXT_NODE &&
+      endContainer.nodeType === Node.TEXT_NODE
+    ) {
       const startText = startContainer.textContent || "";
       const endText = endContainer.textContent || "";
 
@@ -552,14 +604,15 @@ export function TranscriptionPanel({
             // Position the popover below the selection
             setPopoverPosition({
               x: rect.left - containerRect.left,
-              y: rect.bottom - containerRect.top + contentRef.current!.scrollTop,
+              y:
+                rect.bottom - containerRect.top + contentRef.current!.scrollTop,
             });
             setPopoverOpen(true);
           }
         }
       }, 10);
     },
-    [isEditing, onBookmarkCreate, expandToWordBoundaries]
+    [isEditing, onBookmarkCreate, expandToWordBoundaries],
   );
 
   // Handle bookmark creation
@@ -570,7 +623,7 @@ export function TranscriptionPanel({
       setPendingSelection(null);
       window.getSelection()?.removeAllRanges();
     },
-    [onBookmarkCreate]
+    [onBookmarkCreate],
   );
 
   // Close popover
@@ -595,7 +648,7 @@ export function TranscriptionPanel({
 
         if (Array.isArray(section.content)) {
           const filteredContent = section.content.filter((item) =>
-            item.toLowerCase().includes(query)
+            item.toLowerCase().includes(query),
           );
           if (filteredContent.length > 0 || titleMatches) {
             return {
@@ -635,7 +688,9 @@ export function TranscriptionPanel({
       </div>
 
       {/* Search and Bookmarks - disabled during editing */}
-      <div className={`flex items-center justify-between gap-3 ${isEditing ? "opacity-50 pointer-events-none" : ""}`}>
+      <div
+        className={`flex items-center justify-between gap-3 ${isEditing ? "opacity-50 pointer-events-none" : ""}`}
+      >
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
           <Input
@@ -656,11 +711,17 @@ export function TranscriptionPanel({
             onCheckedChange={setShowBookmarks}
             disabled={isEditing}
           />
-          <label htmlFor="bookmarks" className={`text-sm font-medium ${isEditing ? "" : "cursor-pointer"}`}>
+          <label
+            htmlFor="bookmarks"
+            className={`text-sm font-medium ${isEditing ? "" : "cursor-pointer"}`}
+          >
             Show Bookmarks
           </label>
           {bookmarks.length > 0 && (
-            <Badge variant="secondary" className="ml-1 rounded-full bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400">
+            <Badge
+              variant="secondary"
+              className="ml-1 rounded-full bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400"
+            >
               {bookmarks.length}
             </Badge>
           )}
@@ -674,69 +735,119 @@ export function TranscriptionPanel({
       </div>
 
       {/* Content */}
-      <div
-        ref={contentRef}
-        className="flex-1 overflow-y-auto space-y-4 relative select-text"
-        onMouseUp={handleMouseUp}
-      >
+      <div ref={contentRef} className="flex-1 overflow-hidden relative">
         {isEditing ? (
           /* Editing Mode */
-          editedSections.map((section, index) => (
-            <div key={index} className="space-y-2">
-              <h5 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                {section.title}:
-              </h5>
-              {Array.isArray(section.content) ? (
+          <div className="flex-1 overflow-y-auto space-y-4">
+            {/* Conversation Editor */}
+            {editedConversation && editedConversation.length > 0 && (
+              <div className="space-y-2">
+                <h5 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                  Conversation (JSON format):
+                </h5>
                 <Textarea
-                  value={section.content.join("\n")}
-                  onChange={(e) =>
-                    handleSectionContentChange(
-                      index,
-                      e.target.value.split("\n").filter((line) => line.trim())
-                    )
-                  }
-                  className="min-h-[100px] text-sm"
-                  placeholder="Enter content (one item per line)"
+                  value={JSON.stringify(editedConversation, null, 2)}
+                  onChange={(e) => {
+                    try {
+                      const parsed = JSON.parse(e.target.value);
+                      if (Array.isArray(parsed)) {
+                        setEditedConversation(parsed);
+                      }
+                    } catch {
+                      // Invalid JSON, just update the text
+                    }
+                  }}
+                  className="min-h-[200px] text-sm font-mono"
+                  placeholder="Edit conversation as JSON..."
                 />
-              ) : (
-                <Textarea
-                  value={section.content}
-                  onChange={(e) =>
-                    handleSectionContentChange(index, e.target.value)
-                  }
-                  className="min-h-[100px] text-sm"
-                  placeholder="Enter content..."
-                />
-              )}
-            </div>
-          ))
-        ) : filteredSections.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-8">
-            {activeSearchQuery
-              ? `No results found for "${activeSearchQuery}"`
-              : "No content available"}
-          </p>
+              </div>
+            )}
+            {editedSections.map((section, index) => (
+              <div key={index} className="space-y-2">
+                <h5 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                  {section.title}:
+                </h5>
+                {Array.isArray(section.content) ? (
+                  <Textarea
+                    value={section.content.join("\n")}
+                    onChange={(e) =>
+                      handleSectionContentChange(
+                        index,
+                        e.target.value
+                          .split("\n")
+                          .filter((line) => line.trim()),
+                      )
+                    }
+                    className="min-h-[100px] text-sm"
+                    placeholder="Enter content (one item per line)"
+                  />
+                ) : (
+                  <Textarea
+                    value={section.content}
+                    onChange={(e) =>
+                      handleSectionContentChange(index, e.target.value)
+                    }
+                    className="min-h-[100px] text-sm"
+                    placeholder="Enter content..."
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+        ) : conversation && conversation.length > 0 ? (
+          /* Show Conversation Transcript */
+          <ConversationTranscript
+            conversation={conversation}
+            sessionDuration={duration}
+            globalSearchQuery={activeSearchQuery}
+          />
         ) : (
-          filteredSections.map((section, index) => (
-            <div key={index} className="space-y-2">
-              <h5 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                <HighlightedText
-                  text={section.title}
-                  searchQuery={activeSearchQuery}
-                  bookmarks={bookmarksWithNumbers}
-                  showBookmarks={showBookmarks}
-                  pendingSelection={pendingSelection}
-                  onBookmarkDelete={onBookmarkDelete}
-                  onBookmarkUpdate={onBookmarkUpdate}
-                />
-                :
-              </h5>
-              {Array.isArray(section.content) ? (
-                <ul className="list-disc list-inside space-y-1 text-sm">
-                  {section.content.map((item, i) => (
-                    <li key={i}>
+          /* Show Sections */
+          <div
+            className="flex-1 overflow-y-auto space-y-4 select-text"
+            onMouseUp={handleMouseUp}
+          >
+            {filteredSections.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-8">
+                {activeSearchQuery
+                  ? `No results found for "${activeSearchQuery}"`
+                  : "No content available"}
+              </p>
+            ) : (
+              filteredSections.map((section, index) => (
+                <div key={index} className="space-y-2">
+                  <h5 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                    <HighlightedText
+                      text={section.title}
+                      searchQuery={activeSearchQuery}
+                      bookmarks={bookmarksWithNumbers}
+                      showBookmarks={showBookmarks}
+                      pendingSelection={pendingSelection}
+                      onBookmarkDelete={onBookmarkDelete}
+                      onBookmarkUpdate={onBookmarkUpdate}
+                    />
+                    :
+                  </h5>
+                  {Array.isArray(section.content) ? (
+                    <ul className="list-disc list-inside space-y-1 text-sm">
+                      {section.content.map((item, i) => (
+                        <li key={i}>
+                          <HighlightedText
+                            text={item}
+                            searchQuery={activeSearchQuery}
+                            bookmarks={bookmarksWithNumbers}
+                            showBookmarks={showBookmarks}
+                            pendingSelection={pendingSelection}
+                            onBookmarkDelete={onBookmarkDelete}
+                            onBookmarkUpdate={onBookmarkUpdate}
+                          />
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-sm leading-relaxed">
                       <HighlightedText
-                        text={item}
+                        text={section.content}
                         searchQuery={activeSearchQuery}
                         bookmarks={bookmarksWithNumbers}
                         showBookmarks={showBookmarks}
@@ -744,35 +855,23 @@ export function TranscriptionPanel({
                         onBookmarkDelete={onBookmarkDelete}
                         onBookmarkUpdate={onBookmarkUpdate}
                       />
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-sm leading-relaxed">
-                  <HighlightedText
-                    text={section.content}
-                    searchQuery={activeSearchQuery}
-                    bookmarks={bookmarksWithNumbers}
-                    showBookmarks={showBookmarks}
-                    pendingSelection={pendingSelection}
-                    onBookmarkDelete={onBookmarkDelete}
-                    onBookmarkUpdate={onBookmarkUpdate}
-                  />
-                </p>
-              )}
-            </div>
-          ))
-        )}
+                    </p>
+                  )}
+                </div>
+              ))
+            )}
 
-        {/* Bookmark Popover - only show when not editing */}
-        {!isEditing && (
-          <BookmarkPopover
-            isOpen={popoverOpen}
-            onClose={handleClosePopover}
-            selectedText={selectedText}
-            position={popoverPosition}
-            onCreateBookmark={handleCreateBookmark}
-          />
+            {/* Bookmark Popover - only show when not editing */}
+            {!isEditing && (
+              <BookmarkPopover
+                isOpen={popoverOpen}
+                onClose={handleClosePopover}
+                selectedText={selectedText}
+                position={popoverPosition}
+                onCreateBookmark={handleCreateBookmark}
+              />
+            )}
+          </div>
         )}
       </div>
     </div>
