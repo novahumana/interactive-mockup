@@ -17,6 +17,7 @@ import {
   ContextMenuRadioItem,
 } from "@/components/ui/context-menu";
 import { ConversationTurn, Bookmark } from "@/types/types";
+import { capitalizeFirstLetter } from "@/lib/utils";
 
 // Inline bookmark highlight component for conversation transcript
 function BookmarkHighlightInline({
@@ -423,7 +424,7 @@ export function ConversationTranscript({
                       : "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-400 border-amber-200 dark:border-amber-800"
                   }`}
                 >
-                  {turn.speaker === "therapist" ? "Therapist" : "Patient"}
+                  {capitalizeFirstLetter(turn.speaker)}
                 </Badge>
               </div>
 
