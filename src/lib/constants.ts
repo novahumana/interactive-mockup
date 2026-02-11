@@ -1,6 +1,6 @@
 /**
  * Humana Brand Constants
- * Colori e configurazioni del brand estratti dal design Figma
+ * Colors and brand configurations extracted from the Figma design
  */
 
 export const BRAND = {
@@ -9,8 +9,8 @@ export const BRAND = {
 } as const;
 
 /**
- * Colori del brand Humana
- * Basati sul design system Figma
+ * Humana Brand Colors
+ * Based on the Figma design system
  */
 export const COLORS = {
   // AI Status Colors
@@ -41,7 +41,7 @@ export const COLORS = {
 } as const;
 
 /**
- * Configurazione navigazione sidebar
+ * Sidebar navigation configuration
  */
 export const NAVIGATION = {
   main: [

@@ -26,6 +26,11 @@ import {
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import {
+  PATIENT_ID_001,
+  PATIENT_ID_002,
+  PATIENT_ID_003,
+} from "@/mocks/patient-data";
 
 const navigation = [
   {
@@ -47,22 +52,22 @@ const navigation = [
 
 const todayAppointments = [
   {
-    id: "1",
+    id: PATIENT_ID_001,
     name: "Mario R.",
     initials: "MR",
-    url: "/patients/1",
+    url: `/patients/${PATIENT_ID_001}`,
   },
   {
-    id: "2",
+    id: PATIENT_ID_002,
     name: "Giada D.",
     initials: "GD",
-    url: "/patients/2",
+    url: `/patients/${PATIENT_ID_002}`,
   },
   {
-    id: "3",
+    id: PATIENT_ID_003,
     name: "Tommaso G.",
     initials: "TG",
-    url: "/patients/3",
+    url: `/patients/${PATIENT_ID_003}`,
   },
 ];
 
