@@ -25,16 +25,7 @@ export function ConversationTranscript({
     new Set(),
   );
 
-  // Calculate approximate timestamps
-  const getTotalLines = () => conversation.length;
-  const getTimestamp = (lineIndex: number): string => {
-    const totalLines = getTotalLines();
-    const totalMinutes = parseInt(sessionDuration.split(" ")[0]) || 58;
-    const minutesPerLine = totalMinutes / totalLines;
-    const minutes = Math.floor(lineIndex * minutesPerLine);
-    const seconds = Math.round(((lineIndex * minutesPerLine) % 1) * 60);
-    return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
-  };
+
 
   const toggleLineExpansion = (index: number) => {
     setExpandedLines((prev) => {
