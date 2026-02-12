@@ -19,34 +19,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { AIBadge } from "@/components/humana";
+import { Patient } from "@/types/types";
+import { patientsData } from "@/mocks/patient-data";
 
-interface Patient {
-  id: string;
-  name: string;
-  patientId: string;
-  status: "active" | "intake";
-  aiTranscription: "enabled" | "disabled";
-  lastSession: string;
-}
-
-const patients: Patient[] = [
-  {
-    id: "1",
-    name: "Mario R.",
-    patientId: "PZ-023",
-    status: "active",
-    aiTranscription: "enabled",
-    lastSession: "2024-12-01",
-  },
-  {
-    id: "2",
-    name: "Laura F.",
-    patientId: "PZ-023",
-    status: "intake",
-    aiTranscription: "disabled",
-    lastSession: "2024-12-01",
-  },
-];
+const patients: Patient[] = Object.values(patientsData);
 
 export function PatientsTable() {
   return (
@@ -78,7 +54,9 @@ export function PatientsTable() {
                 </TableCell>
                 <TableCell>
                   <Badge
-                    variant={patient.status === "active" ? "success" : "secondary"}
+                    variant={
+                      patient.status === "active" ? "success" : "secondary"
+                    }
                   >
                     {patient.status === "active" ? "Active" : "Intake (New)"}
                   </Badge>
@@ -118,7 +96,7 @@ export function PatientsTable() {
 
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
-          Showing 1-2 of 2 patients
+          Showing 1-2 of {patients.length} patients
         </p>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="icon" className="size-8" disabled>

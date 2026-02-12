@@ -15,17 +15,9 @@ import {
   PopoverContent,
   PopoverAnchor,
 } from "@/components/ui/popover";
-
-export interface Bookmark {
-  id: string;
-  text: string;
-  framework: string;
-  category: string;
-  createdAt: Date;
-  // Position info for handling duplicate text
-  sectionIndex?: number;
-  contentIndex?: number;
-}
+import { Bookmark } from "@/types/types";
+import { LocalStorage } from "@/data/localStorage";
+import { STORAGE_KEYS } from "@/data/constants";
 
 interface BookmarkPopoverProps {
   isOpen: boolean;
@@ -34,9 +26,6 @@ interface BookmarkPopoverProps {
   position: { x: number; y: number };
   onCreateBookmark: (bookmark: Omit<Bookmark, "id" | "createdAt">) => void;
 }
-
-const STORAGE_KEY_FRAMEWORK = "humana-bookmark-preferred-framework";
-const STORAGE_KEY_CATEGORY = "humana-bookmark-preferred-category";
 
 const frameworks = [
   { value: "longitudinal-formulation", label: "Longitudinal Formulation" },
@@ -51,16 +40,16 @@ const categories = [
   { value: "triggers", label: "Triggers" },
 ];
 
+const storage = LocalStorage.getInstance();
+
 // Helper to get stored preference
 function getStoredPreference(key: string): string {
-  if (typeof window === "undefined") return "";
-  return localStorage.getItem(key) || "";
+  return storage.getString(key);
 }
 
 // Helper to set stored preference
 function setStoredPreference(key: string, value: string): void {
-  if (typeof window === "undefined") return;
-  localStorage.setItem(key, value);
+  storage.setString(key, value);
 }
 
 export function BookmarkPopover({
@@ -72,10 +61,10 @@ export function BookmarkPopover({
 }: BookmarkPopoverProps) {
   // Initialize state with stored preferences
   const [framework, setFramework] = React.useState(() =>
-    getStoredPreference(STORAGE_KEY_FRAMEWORK)
+    getStoredPreference(STORAGE_KEYS.bookmarkPreferredFramework),
   );
   const [category, setCategory] = React.useState(() =>
-    getStoredPreference(STORAGE_KEY_CATEGORY)
+    getStoredPreference(STORAGE_KEYS.bookmarkPreferredCategory),
   );
 
   // Handle ESC key to close
@@ -93,13 +82,13 @@ export function BookmarkPopover({
   // Update framework handler - save to localStorage
   const handleFrameworkChange = React.useCallback((value: string) => {
     setFramework(value);
-    setStoredPreference(STORAGE_KEY_FRAMEWORK, value);
+    setStoredPreference(STORAGE_KEYS.bookmarkPreferredFramework, value);
   }, []);
 
   // Update category handler - save to localStorage
   const handleCategoryChange = React.useCallback((value: string) => {
     setCategory(value);
-    setStoredPreference(STORAGE_KEY_CATEGORY, value);
+    setStoredPreference(STORAGE_KEYS.bookmarkPreferredCategory, value);
   }, []);
 
   const handleCreateBookmark = () => {

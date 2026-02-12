@@ -20,18 +20,13 @@ import {
   ContextMenuRadioGroup,
   ContextMenuRadioItem,
 } from "@/components/ui/context-menu";
-import { BookmarkPopover, type Bookmark } from "./bookmark-popover";
+import { BookmarkPopover } from "./bookmark-popover";
 import { ConversationTranscript } from "./conversation-transcript";
-
-interface ConversationTurn {
-  speaker: "therapist" | "patient";
-  message: string;
-}
-
-interface TranscriptionSection {
-  title: string;
-  content: string | string[];
-}
+import {
+  ConversationTurn,
+  TranscriptionSection,
+  Bookmark,
+} from "@/types/types";
 
 interface TranscriptionPanelProps {
   sessionTitle: string;
@@ -47,20 +42,6 @@ interface TranscriptionPanelProps {
   onSectionsChange?: (sections: TranscriptionSection[]) => void;
   onConversationChange?: (conversation: ConversationTurn[]) => void;
 }
-
-// Framework and category labels for display
-const frameworkLabels: Record<string, string> = {
-  "longitudinal-formulation": "Longitudinal Formulation",
-  "hot-cross-bun": "Hot Cross Bun",
-};
-
-const categoryLabels: Record<string, string> = {
-  "childhood-experience": "Childhood Experience",
-  "core-beliefs": "Core Beliefs",
-  "intermediate-beliefs": "Intermediate Beliefs",
-  "coping-strategies": "Coping Strategies",
-  triggers: "Triggers",
-};
 
 // Framework options for selection
 const frameworks = [
@@ -369,7 +350,7 @@ function HighlightedText({
   if (showBookmarks && matchingBookmarks.length > 0) {
     const bookmarkSegments: React.ReactNode[] = [];
     let lastIndex = 0;
-    let processedBookmarkIds = new Set<string>();
+    const processedBookmarkIds = new Set<string>();
 
     // Sort bookmarks by their position in the text
     const sortedMatches = matchingBookmarks
@@ -735,7 +716,11 @@ export function TranscriptionPanel({
       </div>
 
       {/* Content */}
-      <div ref={contentRef} className="flex-1 overflow-hidden relative">
+      <div
+        ref={contentRef}
+        className="flex-1 overflow-hidden relative"
+        onMouseUp={handleMouseUp}
+      >
         {isEditing ? (
           /* Editing Mode */
           <div className="flex-1 overflow-y-auto space-y-4">
@@ -800,13 +785,15 @@ export function TranscriptionPanel({
             conversation={conversation}
             sessionDuration={duration}
             globalSearchQuery={activeSearchQuery}
+            bookmarks={bookmarksWithNumbers}
+            showBookmarks={showBookmarks}
+            pendingSelection={pendingSelection}
+            onBookmarkDelete={onBookmarkDelete}
+            onBookmarkUpdate={onBookmarkUpdate}
           />
         ) : (
           /* Show Sections */
-          <div
-            className="flex-1 overflow-y-auto space-y-4 select-text"
-            onMouseUp={handleMouseUp}
-          >
+          <div className="flex-1 overflow-y-auto space-y-4 select-text">
             {filteredSections.length === 0 ? (
               <p className="text-sm text-muted-foreground text-center py-8">
                 {activeSearchQuery
@@ -860,18 +847,18 @@ export function TranscriptionPanel({
                 </div>
               ))
             )}
-
-            {/* Bookmark Popover - only show when not editing */}
-            {!isEditing && (
-              <BookmarkPopover
-                isOpen={popoverOpen}
-                onClose={handleClosePopover}
-                selectedText={selectedText}
-                position={popoverPosition}
-                onCreateBookmark={handleCreateBookmark}
-              />
-            )}
           </div>
+        )}
+
+        {/* Bookmark Popover - only show when not editing */}
+        {!isEditing && (
+          <BookmarkPopover
+            isOpen={popoverOpen}
+            onClose={handleClosePopover}
+            selectedText={selectedText}
+            position={popoverPosition}
+            onCreateBookmark={handleCreateBookmark}
+          />
         )}
       </div>
     </div>

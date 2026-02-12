@@ -6,17 +6,15 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
+import { Note } from "@/types/types";
 
-interface Note {
-  id: string;
-  badge?: string;
-  content: string;
+interface NoteWrapper extends Note {
   canDelete?: boolean;
   canEdit?: boolean;
 }
 
 interface NotesPanelProps {
-  notes: Note[];
+  notes: NoteWrapper[];
   onAddNote?: () => void;
   onDeleteNote?: (noteId: string) => void;
   onEditNote?: (noteId: string, newContent: string) => void;
@@ -49,7 +47,7 @@ function HighlightedText({
           </mark>
         ) : (
           part
-        )
+        ),
       )}
     </>
   );
@@ -73,14 +71,16 @@ export function NotesPanel({
   const activeSearchQuery = globalSearchQuery || localSearchQuery;
 
   const filteredNotes = notes.filter((note) =>
-    note.content.toLowerCase().includes(activeSearchQuery.toLowerCase())
+    note.content.toLowerCase().includes(activeSearchQuery.toLowerCase()),
   );
 
   return (
     <div className="flex flex-col gap-4 rounded-xl border bg-card p-4 h-full">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold leading-none">Notes ({notes.length})</h3>
+        <h3 className="text-lg font-semibold leading-none">
+          Notes ({notes.length})
+        </h3>
         <Button size="sm" onClick={onAddNote} className="h-8 rounded-md">
           Add Note
           <Plus className="ml-1.5 size-4" />
@@ -138,7 +138,16 @@ interface NoteCardProps {
   onEdit?: (noteId: string, newContent: string) => void;
 }
 
-function NoteCard({ id, badge, content, searchQuery = "", canDelete, canEdit, onDelete, onEdit }: NoteCardProps) {
+function NoteCard({
+  id,
+  badge,
+  content,
+  searchQuery = "",
+  canDelete,
+  canEdit,
+  onDelete,
+  onEdit,
+}: NoteCardProps) {
   const [isEditing, setIsEditing] = React.useState(false);
   const [editedContent, setEditedContent] = React.useState(content);
   const textareaRef = React.useRef<HTMLTextAreaElement>(null);
@@ -147,7 +156,10 @@ function NoteCard({ id, badge, content, searchQuery = "", canDelete, canEdit, on
   React.useEffect(() => {
     if (isEditing && textareaRef.current) {
       textareaRef.current.focus();
-      textareaRef.current.setSelectionRange(editedContent.length, editedContent.length);
+      textareaRef.current.setSelectionRange(
+        editedContent.length,
+        editedContent.length,
+      );
     }
   }, [isEditing, editedContent.length]);
 
@@ -190,7 +202,10 @@ function NoteCard({ id, badge, content, searchQuery = "", canDelete, canEdit, on
         // Edit mode
         <div className="space-y-2">
           {badge && (
-            <Badge variant="secondary" className="text-xs rounded-full px-2 py-0.5">
+            <Badge
+              variant="secondary"
+              className="text-xs rounded-full px-2 py-0.5"
+            >
               {badge}
             </Badge>
           )}
@@ -235,7 +250,10 @@ function NoteCard({ id, badge, content, searchQuery = "", canDelete, canEdit, on
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 space-y-2">
             {badge && (
-              <Badge variant="secondary" className="text-xs rounded-full px-2 py-0.5">
+              <Badge
+                variant="secondary"
+                className="text-xs rounded-full px-2 py-0.5"
+              >
                 {badge}
               </Badge>
             )}

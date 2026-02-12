@@ -17,14 +17,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-
-interface Patient {
-  id: string;
-  name: string;
-  patientId: string;
-  status: "active" | "intake";
-  initials: string;
-}
+import { Patient } from "@/types/types";
 
 const patients: Patient[] = [
   {

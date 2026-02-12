@@ -3,11 +3,7 @@
 import Link from "next/link";
 import { ExternalLink, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
-interface UpcomingSession {
-  date: string;
-  time: string;
-}
+import { UpcomingSession } from "@/types/types";
 
 interface PatientInfoCardProps {
   name: string;
@@ -32,7 +28,12 @@ export function PatientInfoCard({
           <h2 className="text-xl font-semibold">{name}</h2>
           <p className="text-sm text-muted-foreground">{patientId}</p>
         </div>
-        <Button variant="outline" size="sm" asChild={!!patientRouteId} onClick={onViewDetails}>
+        <Button
+          variant="outline"
+          size="sm"
+          asChild={!!patientRouteId}
+          onClick={onViewDetails}
+        >
           {patientRouteId ? (
             <Link href={`/patients/${patientRouteId}`}>
               See Patient Details
