@@ -187,21 +187,21 @@ export function FormulationTab({ bookmarks, sessions }: FormulationTabProps) {
 
   return (
     <>
-      {/* Dark formulation card */}
-      <div className="rounded-md border border-white/10 bg-zinc-950 shadow-sm overflow-hidden">
+      {/* Formulation card */}
+      <div className="rounded-md border border-border bg-card shadow-sm overflow-hidden">
         {/* ── Header bar ── */}
         <div className="px-4 pt-4">
-          <div className="flex items-center justify-between bg-zinc-900 border border-white/10 rounded-md px-4 py-3 shadow-sm">
+          <div className="flex items-center justify-between bg-muted border border-border rounded-md px-4 py-3 shadow-sm">
             {/* Left: Framework + Manage */}
             <div className="flex items-center gap-3">
-              <span className="text-sm text-zinc-400">Framework</span>
-              <Badge className="bg-zinc-100 text-zinc-900 border-transparent hover:bg-zinc-100 text-xs font-semibold px-2 py-0.5">
+              <span className="text-sm text-muted-foreground">Framework</span>
+              <Badge variant="secondary" className="text-xs font-semibold px-2 py-0.5">
                 Beck CBT
               </Badge>
               <Button
                 variant="outline"
                 size="sm"
-                className="h-8 px-3 text-xs bg-white/5 border-white/15 text-zinc-100 hover:bg-white/10 hover:text-white gap-1.5"
+                className="h-8 px-3 text-xs gap-1.5"
                 onClick={() => setManageFrameworksOpen(true)}
               >
                 <Settings className="size-3.5" />
@@ -211,13 +211,13 @@ export function FormulationTab({ bookmarks, sessions }: FormulationTabProps) {
 
             {/* Right: Model combobox */}
             <div className="flex items-center gap-2">
-              <span className="text-sm text-zinc-400">Model</span>
+              <span className="text-sm text-muted-foreground">Model</span>
               <Popover open={modelOpen} onOpenChange={setModelOpen}>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
                     role="combobox"
-                    className="w-[200px] h-9 px-3 justify-between bg-white/5 border-white/15 text-zinc-100 hover:bg-white/10 hover:text-white text-sm font-normal"
+                    className="w-[200px] h-9 px-3 justify-between text-sm font-normal"
                   >
                     <span className="truncate">{modelLabel}</span>
                     <ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50" />
@@ -258,7 +258,7 @@ export function FormulationTab({ bookmarks, sessions }: FormulationTabProps) {
           </div>
         </div>
 
-        <Separator className="mt-4 bg-white/10" />
+        <Separator className="mt-4" />
 
         {/* ── Version section ── */}
         <div className="px-4 pt-4 flex flex-col gap-3">
@@ -266,21 +266,21 @@ export function FormulationTab({ bookmarks, sessions }: FormulationTabProps) {
             {/* Version combobox */}
             <Popover open={versionPickerOpen} onOpenChange={setVersionPickerOpen}>
               <PopoverTrigger asChild>
-                <button className="flex items-center gap-3 bg-white/5 border border-white/15 rounded-md px-4 py-3 w-[320px] min-w-[280px] text-left shadow-sm hover:bg-white/10 transition-colors">
+                <button className="flex items-center gap-3 bg-muted/50 border border-border rounded-md px-4 py-3 w-[320px] min-w-[280px] text-left shadow-sm hover:bg-muted transition-colors">
                   <div className="flex flex-col gap-1 flex-1 min-w-0">
                     {selectedVersion?.isLatest && (
                       <div className="flex items-center gap-1">
-                        <Badge className="bg-zinc-800 text-zinc-100 border-transparent hover:bg-zinc-800 text-[10px] font-semibold px-2 py-0.5 gap-1">
+                        <Badge variant="secondary" className="text-[10px] font-semibold px-2 py-0.5 gap-1">
                           Latest
                           <Flag className="size-3" />
                         </Badge>
                       </div>
                     )}
                     <div className="flex items-center gap-2">
-                      <span className="text-base font-semibold text-zinc-100 leading-none">
+                      <span className="text-base font-semibold text-foreground leading-none">
                         {selectedVersion?.label}
                       </span>
-                      <span className="text-xs text-zinc-400">
+                      <span className="text-xs text-muted-foreground">
                         {selectedVersion
                           ? format(
                               selectedVersion.createdAt,
@@ -290,7 +290,7 @@ export function FormulationTab({ bookmarks, sessions }: FormulationTabProps) {
                       </span>
                     </div>
                   </div>
-                  <ChevronsUpDown className="size-4 text-zinc-400 shrink-0" />
+                  <ChevronsUpDown className="size-4 text-muted-foreground shrink-0" />
                 </button>
               </PopoverTrigger>
               <PopoverContent className="w-[320px] p-0" align="start">
@@ -339,7 +339,7 @@ export function FormulationTab({ bookmarks, sessions }: FormulationTabProps) {
               <Button
                 variant="secondary"
                 size="sm"
-                className="h-8 px-3 text-xs bg-zinc-800 text-zinc-100 hover:bg-zinc-700 border-0 gap-1.5"
+                className="h-8 px-3 text-xs gap-1.5"
                 onClick={() => setCompareOpen(true)}
                 disabled={versions.length < 2}
               >
@@ -349,7 +349,7 @@ export function FormulationTab({ bookmarks, sessions }: FormulationTabProps) {
               <Button
                 variant="secondary"
                 size="sm"
-                className="h-8 px-3 text-xs bg-zinc-800 text-zinc-100 hover:bg-zinc-700 border-0 gap-1.5"
+                className="h-8 px-3 text-xs gap-1.5"
                 onClick={handleAddVersion}
               >
                 <Plus className="size-4" />
@@ -360,8 +360,8 @@ export function FormulationTab({ bookmarks, sessions }: FormulationTabProps) {
 
           {/* Info row */}
           <div className="flex gap-2 items-start">
-            <Info className="size-4 text-zinc-500 shrink-0 mt-0.5" />
-            <p className="text-xs text-zinc-500 leading-relaxed">
+            <Info className="size-4 text-muted-foreground shrink-0 mt-0.5" />
+            <p className="text-xs text-muted-foreground leading-relaxed">
               Versions are generated from the current snapshot of all bookmarks
               across sessions.{" "}
               <span className="block">
@@ -371,18 +371,18 @@ export function FormulationTab({ bookmarks, sessions }: FormulationTabProps) {
           </div>
         </div>
 
-        <Separator className="mt-4 bg-white/10" />
+        <Separator className="mt-4" />
 
         {/* ── Content section ── */}
         <div className="px-4 pt-4 pb-10 flex flex-col gap-4">
           {/* Session filter tabs */}
-          <div className="flex items-center bg-zinc-900 rounded-lg p-0.5 h-9">
+          <div className="flex items-center bg-muted rounded-lg p-0.5 h-9">
             <button
               className={cn(
                 "flex-1 text-sm font-medium px-3 py-1 rounded-md transition-colors h-full",
                 sessionFilter === "all"
-                  ? "bg-white/10 text-zinc-100 border border-white/15 shadow-sm"
-                  : "text-zinc-400 hover:text-zinc-100",
+                  ? "bg-background text-foreground border border-border shadow-sm"
+                  : "text-muted-foreground hover:text-foreground",
               )}
               onClick={() => setSessionFilter("all")}
             >
@@ -394,8 +394,8 @@ export function FormulationTab({ bookmarks, sessions }: FormulationTabProps) {
                 className={cn(
                   "flex-1 text-sm font-medium px-3 py-1 rounded-md transition-colors h-full",
                   sessionFilter === s.id
-                    ? "bg-white/10 text-zinc-100 border border-white/15 shadow-sm"
-                    : "text-zinc-400 hover:text-zinc-100",
+                    ? "bg-background text-foreground border border-border shadow-sm"
+                    : "text-muted-foreground hover:text-foreground",
                 )}
                 onClick={() => setSessionFilter(s.id)}
               >
@@ -411,14 +411,14 @@ export function FormulationTab({ bookmarks, sessions }: FormulationTabProps) {
               {/* Group label */}
               <div className="flex items-center justify-between h-8 px-1">
                 <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                  <Badge className="bg-zinc-800 text-zinc-100 border-transparent hover:bg-zinc-800 text-[10px] font-semibold px-1.5 py-0.5">
+                  <Badge variant="secondary" className="text-[10px] font-semibold px-1.5 py-0.5">
                     {
                       BECK_CBT_CATEGORIES.filter(
                         (c) => (bookmarksByCategory[c]?.length ?? 0) > 0,
                       ).length
                     }
                   </Badge>
-                  <span className="text-xs text-zinc-400 font-medium truncate">
+                  <span className="text-xs text-muted-foreground font-medium truncate">
                     Categories
                   </span>
                 </div>
@@ -426,15 +426,15 @@ export function FormulationTab({ bookmarks, sessions }: FormulationTabProps) {
 
               {/* Category search */}
               <div className="relative flex items-center">
-                <Search className="absolute left-3 size-4 text-zinc-500 pointer-events-none" />
+                <Search className="absolute left-3 size-4 text-muted-foreground pointer-events-none" />
                 <Input
                   placeholder="Search keywords…"
                   value={categorySearch}
                   onChange={(e) => setCategorySearch(e.target.value)}
-                  className="pl-9 pr-10 h-9 bg-white/5 border-white/15 text-zinc-100 placeholder:text-zinc-500 text-sm"
+                  className="pl-9 pr-10 h-9 text-sm"
                 />
                 <div className="absolute right-2">
-                  <Kbd className="text-zinc-500 bg-zinc-800 border-0">⌘</Kbd>
+                  <Kbd className="text-muted-foreground bg-muted border-0">⌘</Kbd>
                 </div>
               </div>
 
@@ -449,17 +449,17 @@ export function FormulationTab({ bookmarks, sessions }: FormulationTabProps) {
                       className={cn(
                         "flex items-center gap-2 h-8 px-2 rounded-md text-sm transition-colors w-full text-left",
                         selectedCategory === cat
-                          ? "bg-white/10 text-zinc-100"
-                          : "text-zinc-400 hover:text-zinc-100 hover:bg-white/5",
+                          ? "bg-accent text-accent-foreground"
+                          : "text-muted-foreground hover:text-foreground hover:bg-accent/50",
                       )}
                     >
                       <span className="flex-1 truncate">{cat}</span>
                       {count > 0 && (
-                        <Badge className="bg-zinc-800 text-zinc-100 border-transparent hover:bg-zinc-800 text-[10px] font-semibold px-1.5 py-0 ml-auto shrink-0">
+                        <Badge variant="secondary" className="text-[10px] font-semibold px-1.5 py-0 ml-auto shrink-0">
                           {count}
                         </Badge>
                       )}
-                      <ChevronRight className="size-4 text-zinc-600 shrink-0" />
+                      <ChevronRight className="size-4 text-muted-foreground shrink-0" />
                     </button>
                   );
                 })}
@@ -476,18 +476,18 @@ export function FormulationTab({ bookmarks, sessions }: FormulationTabProps) {
                   <div
                     key={cat}
                     className={cn(
-                      "flex flex-col gap-2 p-4 rounded-md border shadow-lg transition-colors",
+                      "flex flex-col gap-2 p-4 rounded-md border shadow-sm transition-colors cursor-pointer",
                       selectedCategory === cat
-                        ? "bg-zinc-900 border-white/20"
-                        : "bg-zinc-950 border-white/10",
+                        ? "bg-muted border-border"
+                        : "bg-card border-border hover:bg-muted/50",
                     )}
                     onClick={() => setSelectedCategory(cat)}
                   >
                     <div className="flex items-start justify-between">
-                      <span className="text-base font-semibold text-white leading-none">
+                      <span className="text-base font-semibold text-foreground leading-none">
                         {cat}
                       </span>
-                      <Badge className="bg-zinc-800 text-zinc-100 border-transparent hover:bg-zinc-800 text-xs font-semibold">
+                      <Badge variant="secondary" className="text-xs font-semibold">
                         {catBookmarks.length}{" "}
                         {catBookmarks.length === 1 ? "bookmark" : "bookmarks"}
                       </Badge>
@@ -495,9 +495,9 @@ export function FormulationTab({ bookmarks, sessions }: FormulationTabProps) {
                     {catBookmarks.map((bm, idx) => (
                       <React.Fragment key={bm.id}>
                         {idx > 0 && (
-                          <Separator className="bg-white/10 my-1" />
+                          <Separator className="my-1" />
                         )}
-                        <p className="text-sm text-zinc-100 leading-relaxed whitespace-pre-wrap">
+                        <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">
                           {bm.text}
                         </p>
                       </React.Fragment>
@@ -510,8 +510,8 @@ export function FormulationTab({ bookmarks, sessions }: FormulationTabProps) {
               {BECK_CBT_CATEGORIES.every(
                 (cat) => (bookmarksByCategory[cat]?.length ?? 0) === 0,
               ) && (
-                <div className="flex items-center justify-center h-[200px] border-2 border-dashed border-white/10 rounded-lg">
-                  <p className="text-sm text-zinc-500">
+                <div className="flex items-center justify-center h-[200px] border-2 border-dashed border-border rounded-lg">
+                  <p className="text-sm text-muted-foreground">
                     No bookmarks yet. Start creating bookmarks from the
                     transcription to populate this formulation.
                   </p>
