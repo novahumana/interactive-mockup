@@ -17,6 +17,7 @@ export const patientsData: Record<string, Patient> = {
     recordedSessions: 3,
     caseSummary: "",
     nextSessionPrep: "",
+    upcomingSessions: [{ date: "2024-10-04", time: "10:00" }],
     sessions: [
       {
         id: "s1",
@@ -419,7 +420,43 @@ export const patientsData: Record<string, Patient> = {
               "Patient expressed significant shame around perceived workplace failures, linking current feelings to childhood experiences of parental criticism.",
           },
         ],
-        bookmarks: [],
+        bookmarks: [
+          {
+            id: "b1",
+            text: "Raised in achievement-oriented family. Father was emotionally distant and critical. Mother anxious and perfectionistic. Learned that love was conditional on performance.",
+            framework: "Beck CBT",
+            category: "Childhood Experiences",
+            createdAt: new Date("2024-09-20"),
+          },
+          {
+            id: "b2",
+            text: "If I am not perfect, I will be rejected. If I show weakness, others will exploit it.",
+            framework: "Beck CBT",
+            category: "Intermediate Beliefs / Rules",
+            createdAt: new Date("2024-09-20"),
+          },
+          {
+            id: "b3",
+            text: "I must always exceed expectations to be accepted.",
+            framework: "Beck CBT",
+            category: "Intermediate Beliefs / Rules",
+            createdAt: new Date("2024-09-20"),
+          },
+          {
+            id: "b4",
+            text: "I am inadequate. Making mistakes means I am fundamentally flawed.",
+            framework: "Beck CBT",
+            category: "Core Beliefs",
+            createdAt: new Date("2024-09-20"),
+          },
+          {
+            id: "b5",
+            text: "Overworking and over-preparation to avoid failure. Avoidance of any situation where imperfection might be visible.",
+            framework: "Beck CBT",
+            category: "Coping Strategies",
+            createdAt: new Date("2024-09-20"),
+          },
+        ],
       },
       {
         id: "s2",

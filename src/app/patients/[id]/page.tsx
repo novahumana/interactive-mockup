@@ -11,6 +11,7 @@ import {
   FileText,
   Search,
 } from "lucide-react";
+import { DatePicker } from "@/components/ui/date-picker";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { PatientSidebar } from "@/components/humana/patient-sidebar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -36,7 +37,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { TranscriptionPanel, NotesPanel } from "@/components/humana";
+import {
+  TranscriptionPanel,
+  NotesPanel,
+  FormulationTab,
+} from "@/components/humana";
 
 import { patientsData } from "@/mocks/patient-data";
 import { LocalStorage } from "@/data/localStorage";
@@ -74,6 +79,41 @@ export default function PatientDetailsPage({
   const [nextSessionPrep, setNextSessionPrep] = React.useState(
     patient?.nextSessionPrep || "",
   );
+
+  const [nextSessionDate, setNextSessionDate] = React.useState<
+    Date | undefined
+  >(undefined);
+  const [nextSessionTime, setNextSessionTime] = React.useState("");
+  const [nextSessionAmPm, setNextSessionAmPm] = React.useState<"AM" | "PM">(
+    "AM",
+  );
+
+  // Populate next session fields client-side only (avoids SSR/localStorage hydration mismatch)
+  React.useEffect(() => {
+    const upcoming = patient?.upcomingSessions?.[0];
+    if (!upcoming?.date) return;
+    setNextSessionDate(new Date(upcoming.date));
+    setNextSessionTime(upcoming.time ?? "");
+    const [hours] = (upcoming.time ?? "").split(":").map(Number);
+    setNextSessionAmPm(hours >= 12 ? "PM" : "AM");
+  }, [patient?.id]);
+
+  const handleAmPmChange = (ampm: "AM" | "PM") => {
+    setNextSessionAmPm(ampm);
+    if (!nextSessionTime) return;
+    const [h, m] = nextSessionTime.split(":").map(Number);
+    let newHour = h;
+    if (ampm === "AM" && h >= 12) newHour = h - 12;
+    if (ampm === "PM" && h < 12) newHour = h + 12;
+    setNextSessionTime(
+      `${String(newHour).padStart(2, "0")}:${String(m).padStart(2, "0")}`,
+    );
+  };
+
+  // All notes across all sessions (for summary view)
+  const allNotes = React.useMemo(() => {
+    return patient?.sessions?.flatMap((s) => s.notes) ?? [];
+  }, [patient?.sessions]);
 
   // Notes & Insights state
   const [selectedSession, setSelectedSession] = React.useState<string>("");
@@ -319,9 +359,13 @@ export default function PatientDetailsPage({
   if (!patient) {
     return (
       <SidebarProvider>
-        <PatientSidebar currentPatientId={patientId} />
+        <PatientSidebar
+          currentPatientId={patientId}
+          aiEnabled={aiEnabled}
+          onAiEnabledChange={setAiEnabled}
+        />
         <SidebarInset>
-          <main className="flex-1 px-8 py-10">
+          <main className="flex-1 pt-10 pb-8 px-10">
             <div className="flex items-center justify-center h-[60vh]">
               <p className="text-muted-foreground">Patient not found</p>
             </div>
@@ -333,10 +377,14 @@ export default function PatientDetailsPage({
 
   return (
     <SidebarProvider>
-      <PatientSidebar currentPatientId={patientId} />
+      <PatientSidebar
+        currentPatientId={patientId}
+        aiEnabled={aiEnabled}
+        onAiEnabledChange={setAiEnabled}
+      />
       <SidebarInset>
         <main className="flex-1 px-8 py-10">
-          <div className="space-y-6 max-w-5xl mx-auto">
+          <div className="page-container space-y-6">
             {/* Header */}
             <div className="space-y-1">
               <div className="flex items-center gap-3">
@@ -412,17 +460,112 @@ export default function PatientDetailsPage({
                         </div>
                       </div>
 
-                      {/* Summary Notes */}
+                      {/* Summary Notes — tabbed by session */}
                       <div className="space-y-2">
                         <label className="text-sm font-medium">
                           Summary notes
                         </label>
-                        <Textarea
-                          placeholder="Patient presents with recurrent depressive episodes linked to workplace stress and perfectionist thinking patterns. Core beliefs around inadequacy identified. Good engagement with cognitive restructuring techniques."
-                          className="min-h-[120px] resize-none"
-                          value={caseSummary}
-                          onChange={(e) => setCaseSummary(e.target.value)}
-                        />
+                        <Tabs defaultValue="all">
+                          <TabsList className="h-8 gap-0.5">
+                            <TabsTrigger
+                              value="all"
+                              className="text-xs px-3 h-7"
+                            >
+                              All notes
+                              {allNotes.length > 0 && (
+                                <Badge
+                                  variant="secondary"
+                                  className="ml-1.5 size-4 p-0 justify-center rounded-full text-[10px]"
+                                >
+                                  {allNotes.length}
+                                </Badge>
+                              )}
+                            </TabsTrigger>
+                            {patient.sessions?.map((session) => (
+                              <TabsTrigger
+                                key={session.id}
+                                value={session.id}
+                                className="text-xs px-3 h-7"
+                              >
+                                {session.dayName.slice(0, 3)} {session.date}
+                                {session.notes.length > 0 && (
+                                  <Badge
+                                    variant="secondary"
+                                    className="ml-1.5 size-4 p-0 justify-center rounded-full text-[10px]"
+                                  >
+                                    {session.notes.length}
+                                  </Badge>
+                                )}
+                              </TabsTrigger>
+                            ))}
+                          </TabsList>
+
+                          {/* All notes */}
+                          <TabsContent value="all" className="mt-2">
+                            {allNotes.length === 0 ? (
+                              <p className="text-sm text-muted-foreground text-center py-6 border rounded-md">
+                                No notes yet
+                              </p>
+                            ) : (
+                              <div className="space-y-2 max-h-[220px] overflow-y-auto pr-1">
+                                {allNotes.map((note) => (
+                                  <div
+                                    key={note.id}
+                                    className="rounded-lg border bg-muted/50 p-3 space-y-1"
+                                  >
+                                    {note.badge && (
+                                      <Badge
+                                        variant="secondary"
+                                        className="text-xs rounded-full px-2 py-0.5"
+                                      >
+                                        {note.badge}
+                                      </Badge>
+                                    )}
+                                    <p className="text-sm leading-relaxed">
+                                      {note.content}
+                                    </p>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </TabsContent>
+
+                          {/* Per-session notes */}
+                          {patient.sessions?.map((session) => (
+                            <TabsContent
+                              key={session.id}
+                              value={session.id}
+                              className="mt-2"
+                            >
+                              {session.notes.length === 0 ? (
+                                <p className="text-sm text-muted-foreground text-center py-6 border rounded-md">
+                                  No notes for this session
+                                </p>
+                              ) : (
+                                <div className="space-y-2 max-h-[220px] overflow-y-auto pr-1">
+                                  {session.notes.map((note) => (
+                                    <div
+                                      key={note.id}
+                                      className="rounded-lg border bg-muted/50 p-3 space-y-1"
+                                    >
+                                      {note.badge && (
+                                        <Badge
+                                          variant="secondary"
+                                          className="text-xs rounded-full px-2 py-0.5"
+                                        >
+                                          {note.badge}
+                                        </Badge>
+                                      )}
+                                      <p className="text-sm leading-relaxed">
+                                        {note.content}
+                                      </p>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </TabsContent>
+                          ))}
+                        </Tabs>
                       </div>
                     </CardContent>
                   </Card>
@@ -435,10 +578,56 @@ export default function PatientDetailsPage({
                         Notes and topics to address in the upcoming session
                       </CardDescription>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="space-y-4">
+                      {/* Next session date + time */}
+                      <div className="flex flex-col gap-2">
+                        <Label className="text-sm font-medium">
+                          Next session
+                        </Label>
+                        <div className="flex items-center gap-2">
+                          <DatePicker
+                            date={nextSessionDate}
+                            onDateChange={setNextSessionDate}
+                            placeholder="Select a date"
+                            className="flex-1 w-auto"
+                          />
+                          <Input
+                            type="time"
+                            value={nextSessionTime}
+                            onChange={(e) => setNextSessionTime(e.target.value)}
+                            className="w-[110px] bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
+                          />
+                          <div className="flex border rounded-md overflow-hidden shrink-0">
+                            <Button
+                              type="button"
+                              variant={
+                                nextSessionAmPm === "AM" ? "default" : "ghost"
+                              }
+                              size="sm"
+                              className="rounded-none h-9 px-3 text-xs"
+                              onClick={() => handleAmPmChange("AM")}
+                            >
+                              AM
+                            </Button>
+                            <Button
+                              type="button"
+                              variant={
+                                nextSessionAmPm === "PM" ? "default" : "ghost"
+                              }
+                              size="sm"
+                              className="rounded-none h-9 px-3 text-xs border-l"
+                              onClick={() => handleAmPmChange("PM")}
+                            >
+                              PM
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Prep Notes */}
                       <Textarea
                         placeholder="Add notes, topics to discuss, or interventions to try in the next session..."
-                        className="min-h-[160px] resize-none"
+                        className="min-h-[120px] resize-none"
                         value={nextSessionPrep}
                         onChange={(e) => setNextSessionPrep(e.target.value)}
                       />
@@ -550,21 +739,36 @@ export default function PatientDetailsPage({
                 {/* Two Column Layout */}
                 {currentSession ? (
                   <div className="grid grid-cols-[1fr_360px] gap-4 min-h-[500px]">
-                    {/* Transcription Panel */}
-                    <TranscriptionPanel
-                      sessionTitle={currentSession.transcription.sessionTitle}
-                      sessionDate={currentSession.transcription.sessionDate}
-                      duration={currentSession.transcription.duration}
-                      conversation={getSessionConversation}
-                      sections={getSessionSections}
-                      globalSearchQuery={globalSearchQuery}
-                      bookmarks={currentPatientBookmarks}
-                      onBookmarkCreate={handleCreateBookmark}
-                      onBookmarkDelete={handleDeleteBookmark}
-                      onBookmarkUpdate={handleUpdateBookmark}
-                      onSectionsChange={handleSectionsChange}
-                      onConversationChange={handleConversationChange}
-                    />
+                    {/* Transcription Panel — hidden when no AI consent */}
+                    {aiEnabled ? (
+                      <TranscriptionPanel
+                        sessionTitle={
+                          currentSession.transcription.sessionTitle
+                        }
+                        sessionDate={currentSession.transcription.sessionDate}
+                        duration={currentSession.transcription.duration}
+                        conversation={getSessionConversation}
+                        sections={getSessionSections}
+                        globalSearchQuery={globalSearchQuery}
+                        bookmarks={currentPatientBookmarks}
+                        onBookmarkCreate={handleCreateBookmark}
+                        onBookmarkDelete={handleDeleteBookmark}
+                        onBookmarkUpdate={handleUpdateBookmark}
+                        onSectionsChange={handleSectionsChange}
+                        onConversationChange={handleConversationChange}
+                      />
+                    ) : (
+                      <div className="flex flex-col items-center justify-center gap-3 border-2 border-dashed rounded-lg text-center p-8">
+                        <p className="font-medium text-sm">
+                          Transcription not available
+                        </p>
+                        <p className="text-xs text-muted-foreground max-w-[220px]">
+                          This patient has not given consent for AI
+                          transcription. Enable consent from the Settings icon
+                          in the sidebar.
+                        </p>
+                      </div>
+                    )}
 
                     {/* Notes Panel */}
                     <NotesPanel
@@ -584,11 +788,10 @@ export default function PatientDetailsPage({
 
               {/* Formulation Tab */}
               <TabsContent value="formulation">
-                <div className="flex items-center justify-center h-[40vh] border-2 border-dashed rounded-lg">
-                  <p className="text-muted-foreground">
-                    Formulation content coming soon
-                  </p>
-                </div>
+                <FormulationTab
+                  bookmarks={currentPatientBookmarks}
+                  sessions={patient.sessions}
+                />
               </TabsContent>
 
               {/* Frameworks Tab */}

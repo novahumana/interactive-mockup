@@ -3,8 +3,6 @@
 import * as React from "react";
 import { Inbox, Search } from "lucide-react";
 import { DateRange } from "react-day-picker";
-import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/app-sidebar";
 import { Combobox } from "@/components/ui/combobox";
 import { DateRangePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
@@ -334,10 +332,7 @@ export default function NotesInsightsPage() {
   );
 
   return (
-    <SidebarProvider>
-      <AppSidebar />
-      <SidebarInset className="pt-10 pb-8 px-10 items-center overflow-hidden">
-        <div className="flex flex-col gap-6 flex-1 min-h-0 w-full max-w-7xl">
+    <div className="page-container flex-1 flex flex-col gap-6 overflow-hidden min-h-0">
           {/* Header */}
           <div className="space-y-1 shrink-0">
             <h1 className="text-2xl font-semibold tracking-tight">
@@ -504,9 +499,8 @@ export default function NotesInsightsPage() {
               )}
             </div>
           )}
-        </div>
 
-        {/* Add Note Dialog */}
+      {/* Add Note Dialog */}
         <Dialog
           open={isAddNoteDialogOpen}
           onOpenChange={setIsAddNoteDialogOpen}
@@ -552,8 +546,7 @@ export default function NotesInsightsPage() {
               </Button>
             </DialogFooter>
           </DialogContent>
-        </Dialog>
-      </SidebarInset>
-    </SidebarProvider>
+      </Dialog>
+    </div>
   );
 }

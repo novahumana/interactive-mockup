@@ -5,3 +5,4 @@ export { NotesPanel } from "./notes-panel";
 export { BookmarkPopover } from "./bookmark-popover";
 export { PatientSidebar } from "./patient-sidebar";
 export { ConversationTranscript } from "./conversation-transcript";
+export { FormulationTab } from "./formulation-tab";

@@ -1,8 +1,6 @@
 "use client";
 
 import { Plus, Search } from "lucide-react";
-import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/app-sidebar";
 import { PatientsTable } from "@/components/patients-table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,11 +15,7 @@ import {
 
 export default function PatientsPage() {
   return (
-    <SidebarProvider>
-      <AppSidebar />
-      <SidebarInset>
-        <main className="flex-1 px-8 py-10">
-          <div className="space-y-6 max-w-5xl">
+    <div className="page-container space-y-6">
             {/* Header */}
             <div className="space-y-1">
               <h1 className="text-2xl font-semibold tracking-tight">
@@ -70,9 +64,6 @@ export default function PatientsPage() {
 
             {/* Table */}
             <PatientsTable />
-          </div>
-        </main>
-      </SidebarInset>
-    </SidebarProvider>
+    </div>
   );
 }
